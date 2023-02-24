@@ -1,15 +1,12 @@
-module kscaler
+module github.com/rosskirkpat/kscaler
 
 go 1.19
-
-replace github.com/rosskirkpat/kscaler => ../kscaler
 
 require (
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/iancoleman/strcase v0.2.0
 	github.com/kudobuilder/test-tools v0.8.0
 	github.com/magefile/mage v1.14.0
-	github.com/rosskirkpat/kscaler v0.0.0-00010101000000-000000000000
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.14.0

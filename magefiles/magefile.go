@@ -16,11 +16,13 @@ import (
 	"github.com/rosskirkpat/kscaler/magetools"
 )
 
-var Default = Build
-var g *magetools.Go
-var version string
-var commit string
-var artifactOutput = filepath.Join("artifacts")
+var (
+	Default        = Build
+	g              *magetools.Go
+	version        string
+	commit         string
+	artifactOutput = filepath.Join("artifacts")
+)
 
 func Version() error {
 	c, err := magetools.GetCommit()
