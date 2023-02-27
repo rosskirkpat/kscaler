@@ -9,7 +9,7 @@ Why use kscaler?
 
 I started with various forms of "simple" scale testing for k8s clusters; bash scripts, one-off manifests, kubectl copy-pasta, and terraform modules.
 
-Ultimately, I wanted a single solution that works on *all* the platforms I develop on: Windows, Mac, and Linux. Enter revvy.
+Ultimately, I wanted a single solution that works on *all* the platforms I develop on: Windows, Mac, and Linux. Enter kscaler.
 
 ## default kubeconfig paths
 
@@ -30,7 +30,7 @@ pod: `image`
 
 secret: `size`
 
-- set a custom secret size in kilobytes. The default is a random size in the range of 1Kb to 1500Kb for each secret revvy creates.
+- set a custom secret size in kilobytes. The default is a random size in the range of 1Kb to 1500Kb for each secret kscaler creates.
 
 ## examples
 
@@ -42,7 +42,7 @@ kscaler namespace 500
 kscaler secret 5000 --size 750 
 
 # Create 5000 secrets with auto-generated size ranging from 1Kb to 1500Kb
-# The default behavior for revvy when performing secret generation is to randomize the size of each secret
+# The default behavior for kscaler when performing secret generation is to randomize the size of each secret
 kscaler secret 5000
 
 # Create 875 pods using the default busybox container image
@@ -58,9 +58,9 @@ kscaler pod 875 --image cptrosskirk/busybox-scaler
 
 Not unless you tell it to. kscaler was intended to be a "scale until it breaks" tool. With that design in mind, I opted to make cleanup a manual task as the easier solution would be to tear down and build a new kubernetes cluster.
 
-- How can I tell revvy to cleanup the resources it creates?
+- How can I tell kscaler to cleanup the resources it creates?
 
-`kscaler cleanup` will attempt to perform a deletion on every resource it created by looking for the `revvy-made-this: true` label on each resource in the specified k8s cluster. revvy will prompt for confirmation prior to starting the cleanup unless `--approve` is also passed.
+`kscaler cleanup` will attempt to perform a deletion on every resource it created by looking for the `kscaler-made-this: true` label on each resource in the specified k8s cluster. revvy will prompt for confirmation prior to starting the cleanup unless `--approve` is also passed.
 
 ## Should I run this in production?
 
