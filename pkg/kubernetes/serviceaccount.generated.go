@@ -77,7 +77,7 @@ func ListServiceAccounts(client client.Client, namespace string) ([]ServiceAccou
 }
 
 // Delete deletes a ServiceAccount from the Kubernetes cluster.
-func (serviceaccount ServiceAccount) Delete() error {
+func (serviceaccount *ServiceAccount) Delete() error {
 	options := metav1.DeleteOptions{}
 
 	err := serviceaccount.client.Kubernetes.

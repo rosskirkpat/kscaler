@@ -13,7 +13,7 @@ import (
 //go:generate stub-gen -api CoreV1 -type Pod
 
 // ContainerLogs returns the (current) logs of a pod's container.
-func (pod Pod) ContainerLogs(container string) ([]byte, error) {
+func (pod *Pod) ContainerLogs(container string) ([]byte, error) {
 	options := corev1.PodLogOptions{
 		Container: container,
 	}
@@ -32,7 +32,7 @@ func (pod Pod) ContainerLogs(container string) ([]byte, error) {
 }
 
 // ContainerExec runs a command in a pod's container.
-func (pod Pod) ContainerExec(container string, command cmd.Builder) error {
+func (pod *Pod) ContainerExec(container string, command cmd.Builder) error {
 	ctx, cancel := context.WithTimeout(
 		context.Background(),
 		60,

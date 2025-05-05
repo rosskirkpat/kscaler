@@ -18,10 +18,11 @@ func scale(cmd *cobra.Command, args []string) {
 	v := viper.GetViper()
 	logrus.Traceln("trace starting")
 	logrus.Debugln("debug starting")
+	logrus.Infof("number value from root cmd: %v\n", cmd.Root().Flag("number").Value.String())
 	cmd.Flags().IntP("number", "n", 1, "Number of resources to create")
 	cmd.Flags().String(v.GetString("resource"), "", "Type of resource to create")
 	logrus.Printf("creating (%v) resources of type (%v)", viper.GetInt("number"), viper.GetString("resource"))
-	err := Parser()
+	err := Parser(&KScalerConfig{})
 	if err != nil {
 		cmd.Println("")
 		cmd.Println("[scale] error encountered")

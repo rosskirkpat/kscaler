@@ -77,7 +77,7 @@ func ListRoles(client client.Client, namespace string) ([]Role, error) {
 }
 
 // Delete deletes a Role from the Kubernetes cluster.
-func (role Role) Delete() error {
+func (role *Role) Delete() error {
 	options := metav1.DeleteOptions{}
 
 	err := role.client.Kubernetes.

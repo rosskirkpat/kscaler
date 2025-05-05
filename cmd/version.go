@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
 // Version can be set via:
-// -ldflags="-X 'github.com/rosskirkpat/kscale/cmd/version.Version=$TAG'"
+// -ldflags="-X 'github.com/rosskirkpat/kscaler/cmd/version.Version=$TAG'"
 var Version string
 
 // versionCmd represents the version command

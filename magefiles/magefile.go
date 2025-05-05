@@ -103,30 +103,30 @@ func Validate() error {
 
 func Build() error {
 	mg.Deps(Clean, Dependencies, Validate)
-	kscaleOutput := filepath.Join("bin", "kscale.exe")
+	kscalerOutput := filepath.Join("bin", "kscaler.exe")
 
-	log.Printf("[Build] Building kscale version: %s \n", version)
-	log.Printf("[Build] Output: %s \n", kscaleOutput)
-	if err := g.Build(flags, "cmd/resources.go", kscaleOutput); err != nil {
+	log.Printf("[Build] Building kscaler version: %s \n", version)
+	log.Printf("[Build] Output: %s \n", kscalerOutput)
+	if err := g.Build(flags, "cmd/resources.go", kscalerOutput); err != nil {
 		return err
 	}
-	log.Printf("[Build] successfully built kscale version %s \n", version)
+	log.Printf("[Build] successfully built kscaler version %s \n", version)
 
 	log.Printf("[Build] now staging build artifacts \n")
 	if err := os.MkdirAll(artifactOutput, os.ModePerm); err != nil {
 		return err
 	}
 
-	if err := sh.Copy(filepath.Join(artifactOutput, "kscale.exe"), kscaleOutput); err != nil {
+	if err := sh.Copy(filepath.Join(artifactOutput, "kscaler.exe"), kscalerOutput); err != nil {
 		return err
 	}
-	if err := sh.Copy(filepath.Join(artifactOutput, "kscale"), kscaleOutput); err != nil {
+	if err := sh.Copy(filepath.Join(artifactOutput, "kscaler"), kscalerOutput); err != nil {
 		return err
 	}
-	if err := sh.Copy(filepath.Join(artifactOutput, "kscale-windows-amd64.tgz"), kscaleOutput); err != nil {
+	if err := sh.Copy(filepath.Join(artifactOutput, "kscaler-windows-amd64.tgz"), kscalerOutput); err != nil {
 		return err
 	}
-	if err := sh.Copy(filepath.Join(artifactOutput, "kscale-linux-amd64.tgz"), kscaleOutput); err != nil {
+	if err := sh.Copy(filepath.Join(artifactOutput, "kscaler-linux-amd64.tgz"), kscalerOutput); err != nil {
 		return err
 	}
 
@@ -152,11 +152,11 @@ func Build() error {
 
 func Test() error {
 	mg.Deps(Build)
-	log.Printf("[Test] Testing kscale version %s \n", version)
+	log.Printf("[Test] Testing kscaler version %s \n", version)
 	if err := g.Test(flags, "./..."); err != nil {
 		return err
 	}
-	log.Printf("[Test] successfully tested kscale version %s \n", version)
+	log.Printf("[Test] successfully tested kscaler version %s \n", version)
 	return nil
 }
 
@@ -165,7 +165,7 @@ func CI() {
 }
 
 func flags(version string, commit string) string {
-	return fmt.Sprintf(`-s -w -X github.com/rosskirkpat/kscale/pkg/defaults.AppVersion=%s -X github.com/rosskirkpat/kscale /pkg/defaults.AppCommit=%s -extldflags "-static"`, version, commit)
+	return fmt.Sprintf(`-s -w -X github.com/rosskirkpat/kscaler/pkg/defaults.AppVersion=%s -X github.com/rosskirkpat/kscaler/pkg/defaults.AppCommit=%s -extldflags "-static"`, version, commit)
 }
 
 func Docs() error {
@@ -193,7 +193,7 @@ func ValidateDocs() error {
 func InstallDeps() error {
 	fmt.Println("Installing Deps...")
 	installs := []string{
-		"github.com/golangci/golangci-lint/cmd/golangci-lint@v1.46.0",
+		"github.com/golangci/golangci-lint/cmd/golangci-lint@v1.62.1",
 		"github.com/goreleaser/goreleaser@latest",
 	}
 
@@ -215,7 +215,7 @@ func Clean() error {
 	}
 	return sh.Rm("bin")
 	rmFiles := []string{
-		"./kscale.exe",
+		"./kscaler.exe",
 		"./coverage.txt",
 	}
 	for _, f := range rmFiles {

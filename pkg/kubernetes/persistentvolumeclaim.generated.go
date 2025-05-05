@@ -77,7 +77,7 @@ func ListPersistentVolumeClaims(client client.Client, namespace string) ([]Persi
 }
 
 // Delete deletes a PersistentVolumeClaim from the Kubernetes cluster.
-func (persistentvolumeclaim PersistentVolumeClaim) Delete() error {
+func (persistentvolumeclaim *PersistentVolumeClaim) Delete() error {
 	options := metav1.DeleteOptions{}
 
 	err := persistentvolumeclaim.client.Kubernetes.

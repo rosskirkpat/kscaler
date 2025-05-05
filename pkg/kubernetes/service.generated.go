@@ -77,7 +77,7 @@ func ListServices(client client.Client, namespace string) ([]Service, error) {
 }
 
 // Delete deletes a Service from the Kubernetes cluster.
-func (service Service) Delete() error {
+func (service *Service) Delete() error {
 	options := metav1.DeleteOptions{}
 
 	err := service.client.Kubernetes.

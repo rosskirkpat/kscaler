@@ -12,5 +12,3 @@ package main
 //go:generate cmd-gen -type service -hasNamespace=false
 //go:generate cmd-gen -type serviceAccount -hasNamespace=false
 //go:generate cmd-gen -type statefulSet -hasNamespace=false
-
-var number int

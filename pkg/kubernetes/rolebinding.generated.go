@@ -77,7 +77,7 @@ func ListRoleBindings(client client.Client, namespace string) ([]RoleBinding, er
 }
 
 // Delete deletes a RoleBinding from the Kubernetes cluster.
-func (rolebinding RoleBinding) Delete() error {
+func (rolebinding *RoleBinding) Delete() error {
 	options := metav1.DeleteOptions{}
 
 	err := rolebinding.client.Kubernetes.

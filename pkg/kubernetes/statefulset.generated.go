@@ -77,7 +77,7 @@ func ListStatefulSets(client client.Client, namespace string) ([]StatefulSet, er
 }
 
 // Delete deletes a StatefulSet from the Kubernetes cluster.
-func (statefulset StatefulSet) Delete() error {
+func (statefulset *StatefulSet) Delete() error {
 	options := metav1.DeleteOptions{}
 
 	err := statefulset.client.Kubernetes.

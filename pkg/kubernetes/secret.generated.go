@@ -77,7 +77,7 @@ func ListSecrets(client client.Client, namespace string) ([]Secret, error) {
 }
 
 // Delete deletes a Secret from the Kubernetes cluster.
-func (secret Secret) Delete() error {
+func (secret *Secret) Delete() error {
 	options := metav1.DeleteOptions{}
 
 	err := secret.client.Kubernetes.

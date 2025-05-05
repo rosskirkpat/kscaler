@@ -77,7 +77,7 @@ func ListNodes(client client.Client) ([]Node, error) {
 }
 
 // Delete deletes a Node from the Kubernetes cluster.
-func (node Node) Delete() error {
+func (node *Node) Delete() error {
 	options := metav1.DeleteOptions{}
 
 	err := node.client.Kubernetes.

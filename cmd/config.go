@@ -25,19 +25,20 @@ var (
 	KScaleCreatedByLabel    = fmt.Sprintf("created-by=%s", DefaultName)
 	cmdConfig               = &cobra.Command{
 		Use:     "config",
-		Short:   "Config commands: kscale config --help",
-		Long:    `Config commands: kscale config <command>`,
+		Short:   "Config commands: kscaler config --help",
+		Long:    `Config commands: kscaler config <command>`,
 		Aliases: []string{"c"},
 	}
 )
 
-type KScaleConfig struct {
-	Scale     Scaler `json:"scale" yaml:"scale" mapstructure:"scale"`
-	Namespace string `json:"namespace" yaml:"namespace" mapstructure:"namespace"`
-	LogLevel  string `json:"loglevel,logLevel,log_level" yaml:"loglevel, logLevel, log_level" mapstructure:"loglevel, log_level, logLevel"`
-	client    client.Client
-	Type      ResourceType
-	Obj       runtime.Object
+type KScalerConfig struct {
+	Scale          Scaler `json:"scale" yaml:"scale" mapstructure:"scale"`
+	Namespace      string `json:"namespace" yaml:"namespace" mapstructure:"namespace"`
+	LogLevel       string `json:"loglevel,logLevel,log_level" yaml:"loglevel, logLevel, log_level" mapstructure:"loglevel, log_level, logLevel"`
+	kubeconfigPath string
+	client         *client.Client
+	Type           ResourceType
+	Obj            runtime.Object
 }
 
 type Scaler struct {
@@ -61,7 +62,7 @@ type ResourceType struct {
 	service               corev1.Service
 }
 
-func LoadConfig() *KScaleConfig {
+func LoadConfig() *KScalerConfig {
 	if cfgFile != "" {
 		viper.SetConfigFile(cfgFile)
 	} else {
@@ -74,10 +75,10 @@ func LoadConfig() *KScaleConfig {
 		viper.AddConfigPath(fmt.Sprintf("$HOME/.%s", DefaultName))
 		viper.AddConfigPath(fmt.Sprintf("/etc/%s", DefaultName))
 		viper.SetConfigType("yaml")
-		viper.SetConfigName(".kscale")
+		viper.SetConfigName(".kscaler")
 	}
 
-	var config KScaleConfig
+	var config KScalerConfig
 
 	if err := viper.ReadInConfig(); err == nil {
 		logrus.Infof("Using config file: %s", viper.ConfigFileUsed())
@@ -87,15 +88,15 @@ func LoadConfig() *KScaleConfig {
 		})
 		//if err := viper.ReadInConfig(); err != nil {
 		//	if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-		//		// KScaleConfig file not found
+		//		// KScalerConfig file not found
 		//	} else {
-		//		// KScaleConfig file was found but another error was produced
+		//		// KScalerConfig file was found but another error was produced
 		//	}
 		//}
-	} else {
-		logrus.Warnf("[LoadConfig] error when reading config file: %v", err)
-	}
 
+	} else {
+		logrus.Warnf("[LoadConfig] error when reading config file, using default configuration: %v", err)
+	}
 	if err := viper.Unmarshal(&config); err != nil {
 		logrus.Printf("[LoadConfig] unable to decode config file to struct: %v", err)
 	}

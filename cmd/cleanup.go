@@ -20,10 +20,10 @@ var (
 		Short:   "perform a cleanup of every resource created by kscale",
 		Run:     cleanup,
 	}
-	kubeconfig string
-	resource   string
-	ns         string
-	force      bool
+	//kubeconfig string
+	resource string
+	ns       string
+	force    bool
 )
 
 func askConfirm(input io.Reader) bool {
@@ -38,7 +38,7 @@ func askConfirm(input io.Reader) bool {
 }
 
 func cleanup(cmd *cobra.Command, args []string) {
-	cmd.Flags().StringVar(&kubeconfig, "kubeconfig", DefaultKubeConfig, "path to the kubeconfig file")
+	//cmd.Flags().StringVar(&kubeconfig, "kubeconfig", DefaultKubeConfig, "path to the kubeconfig file")
 	cmd.Flags().StringVarP(&ns, "namespace", "n", DefaultNamespace, "namespace to cleanup resources in")
 	cmd.Flags().StringVarP(&resource, "resource", "r", "all", "type of resource to cleanup [Default: all]")
 	cmd.Flags().BoolVarP(&force, "force", "f", false, "force resource cleanup")
@@ -69,7 +69,7 @@ func cleanup(cmd *cobra.Command, args []string) {
 		LabelSelector:  KScaleCreatedByLabel,
 		TimeoutSeconds: &i,
 	}
-	err := c.DeleteCollection(ctx, KScaleConfig{}.Namespace, v1.DeleteOptions{}, listOpts)
+	err := c.DeleteCollection(ctx, KScalerConfig{}.Namespace, v1.DeleteOptions{}, listOpts)
 	if err != nil {
 		cmd.Println("")
 		cmd.Println("[cleanup] error encountered")

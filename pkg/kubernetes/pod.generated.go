@@ -77,7 +77,7 @@ func ListPods(client client.Client, namespace string) ([]Pod, error) {
 }
 
 // Delete deletes a Pod from the Kubernetes cluster.
-func (pod Pod) Delete() error {
+func (pod *Pod) Delete() error {
 	options := metav1.DeleteOptions{}
 
 	err := pod.client.Kubernetes.

@@ -77,7 +77,7 @@ func ListClusterRoles(client client.Client) ([]ClusterRole, error) {
 }
 
 // Delete deletes a ClusterRole from the Kubernetes cluster.
-func (clusterrole ClusterRole) Delete() error {
+func (clusterrole *ClusterRole) Delete() error {
 	options := metav1.DeleteOptions{}
 
 	err := clusterrole.client.Kubernetes.

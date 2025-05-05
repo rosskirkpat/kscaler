@@ -90,7 +90,7 @@ func List{{.Type}}s(client client.Client{{ if .HasNamespace }}, namespace string
 }
 
 // Delete deletes a {{ .Type }} from the Kubernetes cluster.
-func ({{ .Type | toLower }} {{ .Type }}) Delete() error {
+func ({{ .Type | toLower }} *{{ .Type }}) Delete() error {
 	options := metav1.DeleteOptions{}
 
 	err := {{ .Type | toLower }}.client.Kubernetes.
