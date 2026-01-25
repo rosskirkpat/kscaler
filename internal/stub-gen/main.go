@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
+	"go/format"
 	"os"
 	"strings"
 	"text/template"
@@ -165,6 +167,16 @@ func main() {
 
 	outputName := fmt.Sprintf("%s.generated.go", strings.ToLower(parameters.Type))
 
+	var buf bytes.Buffer
+	if err := tmpl.Execute(&buf, parameters); err != nil {
+		panic(err)
+	}
+
+	p, err := format.Source(buf.Bytes())
+	if err != nil {
+		panic(err)
+	}
+
 	output, err := os.Create(outputName)
 	if err != nil {
 		panic(err)
@@ -176,7 +188,8 @@ func main() {
 		}
 	}()
 
-	if err := tmpl.Execute(output, parameters); err != nil {
+	//output.Write(p)
+	if _, err := output.Write(p); err != nil {
 		panic(err)
 	}
 }

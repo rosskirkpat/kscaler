@@ -30,7 +30,7 @@ func NewClusterRoleBinding(client client.Client, clusterrolebinding rbacv1.Clust
 
 	return ClusterRoleBinding{
 		ClusterRoleBinding: *createdClusterRoleBinding,
-		client: client,
+		client:             client,
 	}, nil
 }
 
@@ -48,7 +48,7 @@ func GetClusterRoleBinding(client client.Client, name string) (ClusterRoleBindin
 
 	return ClusterRoleBinding{
 		ClusterRoleBinding: *clusterrolebinding,
-		client: client,
+		client:             client,
 	}, nil
 }
 
@@ -69,7 +69,7 @@ func ListClusterRoleBindings(client client.Client) ([]ClusterRoleBinding, error)
 	for _, item := range list.Items {
 		clusterrolebindings = append(clusterrolebindings, ClusterRoleBinding{
 			ClusterRoleBinding: item,
-			client: client,
+			client:             client,
 		})
 	}
 

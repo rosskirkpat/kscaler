@@ -2,15 +2,18 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 
-	"github.com/rosskirkpat/kscaler/pkg/client"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/util/homedir"
+	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 var (
@@ -20,10 +23,21 @@ var (
 		Short:   "perform a cleanup of every resource created by kscale",
 		Run:     cleanup,
 	}
-	//kubeconfig string
-	resource string
-	ns       string
-	force    bool
+
+	CleanupFuncs = []func(ctx context.Context, cli ctrlclient.Client) error{
+		cleanupDeployment,
+		cleanupNamespace,
+		cleanupNode,
+		cleanupClusterRole,
+		cleanupClusterRoleBinding,
+		cleanupPod,
+		cleanupRole,
+		cleanupRoleBinding,
+		cleanupSecret,
+		cleanupService,
+		cleanupServiceAccount,
+		cleanupStatefulSet,
+	}
 )
 
 func askConfirm(input io.Reader) bool {
@@ -38,42 +52,53 @@ func askConfirm(input io.Reader) bool {
 }
 
 func cleanup(cmd *cobra.Command, args []string) {
-	//cmd.Flags().StringVar(&kubeconfig, "kubeconfig", DefaultKubeConfig, "path to the kubeconfig file")
-	cmd.Flags().StringVarP(&ns, "namespace", "n", DefaultNamespace, "namespace to cleanup resources in")
-	cmd.Flags().StringVarP(&resource, "resource", "r", "all", "type of resource to cleanup [Default: all]")
-	cmd.Flags().BoolVarP(&force, "force", "f", false, "force resource cleanup")
-	//cmd.AddCommand(cleanupCmd)
 	logrus.Traceln("trace starting")
 	logrus.Debugln("debug starting")
 	logrus.Printf("beginning cleanup")
-	// TODO: find each object labeled by kscale and remove it
-	// Ask for confirmation before force removing delegation
+	//Ask for confirmation before force removing delegation
 	if ok, _ := cmd.Flags().GetBool("force"); !ok {
 		cmd.Println("\nAre you sure you want to cleanup? (yes/no)")
 		confirmed := askConfirm(os.Stdin)
 		if !confirmed {
 			logrus.Fatalf("Canceling %v cleanup.", DefaultName)
 		}
-	} else {
 		cmd.Println("Confirmed `yes` from user input")
+	} else {
+		cmd.Println("user supplied --force flag, skipping confirmation before attempting clean up")
 	}
-	ctx, cancel := context.WithTimeout(
-		context.Background(),
-		60,
-	)
-	defer cancel()
 
-	c := client.Client{}
-	i := int64(300)
-	listOpts := v1.ListOptions{
-		LabelSelector:  KScaleCreatedByLabel,
-		TimeoutSeconds: &i,
+	ctx, cancel := context.WithCancelCause(rootCmd.Context())
+	defer cancel(errors.New("cleanup context error"))
+
+	var kubeconfig string
+	if kc, ok := os.LookupEnv("KUBECONFIG"); !ok {
+		if home := homedir.HomeDir(); home != "" {
+			kubeconfig = filepath.Join(home, ".kube", "config")
+		}
+	} else {
+		kubeconfig = kc
 	}
-	err := c.DeleteCollection(ctx, KScalerConfig{}.Namespace, v1.DeleteOptions{}, listOpts)
+
+	logrus.Infof("[cleanup] using kubeconfig: %s\n", kubeconfig)
+
+	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
 	if err != nil {
-		cmd.Println("")
-		cmd.Println("[cleanup] error encountered")
-		logrus.Fatalf(err.Error())
+		logrus.Fatal(err)
+	}
+	config.QPS = -1
+	config.Burst = -1
+	cli, err := ctrlclient.New(config, ctrlclient.Options{
+		Scheme: scheme,
+	})
+	if err != nil || cli == nil {
+		logrus.Fatalf("[cleanup] error encountered: %s\n", err)
 	}
 
+	for _, fn := range CleanupFuncs {
+		err := fn(ctx, cli)
+		if err != nil {
+			logrus.Errorf("cleanup func encountered an unexpected error: %s\n", err)
+			continue
+		}
+	}
 }

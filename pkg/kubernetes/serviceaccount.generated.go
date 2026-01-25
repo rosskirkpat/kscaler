@@ -30,7 +30,7 @@ func NewServiceAccount(client client.Client, serviceaccount corev1.ServiceAccoun
 
 	return ServiceAccount{
 		ServiceAccount: *createdServiceAccount,
-		client: client,
+		client:         client,
 	}, nil
 }
 
@@ -48,7 +48,7 @@ func GetServiceAccount(client client.Client, name string, namespace string) (Ser
 
 	return ServiceAccount{
 		ServiceAccount: *serviceaccount,
-		client: client,
+		client:         client,
 	}, nil
 }
 
@@ -69,7 +69,7 @@ func ListServiceAccounts(client client.Client, namespace string) ([]ServiceAccou
 	for _, item := range list.Items {
 		serviceaccounts = append(serviceaccounts, ServiceAccount{
 			ServiceAccount: item,
-			client: client,
+			client:         client,
 		})
 	}
 

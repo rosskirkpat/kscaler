@@ -22,7 +22,6 @@ var (
 	DefaultConfigFile       = path.Join(DefaultAppDirectory, "config.yaml")
 	DefaultKubeConfig       = path.Join(os.Getenv("HOME"), ".kube/config")
 	TemporaryConfigLocation = path.Join(DefaultAppDirectory, "config.tmp")
-	KScaleCreatedByLabel    = fmt.Sprintf("created-by=%s", DefaultName)
 	cmdConfig               = &cobra.Command{
 		Use:     "config",
 		Short:   "Config commands: kscaler config --help",
@@ -68,7 +67,7 @@ func LoadConfig() *KScalerConfig {
 	} else {
 		home, err := os.UserHomeDir()
 		if err != nil {
-			logrus.Warnf("[initConfig] error detecting UserHomeDir: %v", err)
+			logrus.Warnf("[initConfig] error detecting UserHomeDir: %v\n", err)
 		}
 		viper.AddConfigPath(".")
 		viper.AddConfigPath(home)
@@ -81,24 +80,18 @@ func LoadConfig() *KScalerConfig {
 	var config KScalerConfig
 
 	if err := viper.ReadInConfig(); err == nil {
-		logrus.Infof("Using config file: %s", viper.ConfigFileUsed())
+		logrus.Infof("Using config file: %s\n", viper.ConfigFileUsed())
 		viper.WatchConfig()
 		viper.OnConfigChange(func(e fsnotify.Event) {
-			logrus.Debugf("config file (%s) changed at (%s)", e.Name, time.Now())
+			logrus.Debugf("config file (%s) changed at (%s)\n", e.Name, time.Now())
 		})
-		//if err := viper.ReadInConfig(); err != nil {
-		//	if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-		//		// KScalerConfig file not found
-		//	} else {
-		//		// KScalerConfig file was found but another error was produced
-		//	}
-		//}
-
 	} else {
-		logrus.Warnf("[LoadConfig] error when reading config file, using default configuration: %v", err)
+		logrus.Warnf("[LoadConfig] error when reading config file, using default configuration: %v\n", err)
+		return nil
 	}
 	if err := viper.Unmarshal(&config); err != nil {
-		logrus.Printf("[LoadConfig] unable to decode config file to struct: %v", err)
+		logrus.Errorf("[LoadConfig] unable to decode config file to struct: %v\n", err)
+		return nil
 	}
 	return &config
 }
