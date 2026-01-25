@@ -9,7 +9,7 @@ Why use kscaler?
 
 I started with various forms of "simple" scale testing for k8s clusters; bash scripts, one-off manifests, kubectl copy-pasta, and terraform modules.
 
-Ultimately, I wanted a single solution that works on *all* the platforms I develop on: Windows, Mac, and Linux. Enter kscaler.
+Ultimately, I wanted a single solution that works on *all* of the platforms I develop on: Windows, Mac, and Linux. Enter kscaler.
 
 ## default kubeconfig paths
 
@@ -18,7 +18,7 @@ Linux/Mac: `$HOME/.kube/config`
 
 ## usage
 
-`kscaler resource count --kubeconfig /path/to/kube/config`
+`kscaler resource <count> --kubeconfig /path/to/kube/config`
 
 **Note:** kscaler will attempt read the local `KUBECONFIG` variable if the `--kubeconfig` parameter is not set.
 

@@ -18,7 +18,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
 	"github.com/spf13/viper"
-	easy "github.com/t-tomalak/logrus-easy-formatter"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
@@ -115,9 +114,7 @@ func SetupDocs(path string) error {
 }
 
 func initConfig() {
-	logrus.SetFormatter(&easy.Formatter{
-		LogFormat: "%msg%",
-	})
+	logrus.SetFormatter(&logrus.TextFormatter{})
 	if debugVar {
 		logrus.SetLevel(logrus.DebugLevel)
 	}
