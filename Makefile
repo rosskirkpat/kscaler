@@ -15,7 +15,7 @@ build: generate
 
 generate: ## generate stubs
 	go build -o $(GO_BIN)/cmd-gen internal/cmd-gen/main.go
-	go build -o $(GO_BIN)/cmd-gen internal/cmd-gen/main.go
+	go build -o $(GO_BIN)/stub-gen internal/stub-gen/main.go
 	go generate github.com/rosskirkpat/kscaler/pkg/kubernetes
 	go generate github.com/rosskirkpat/kscaler/cmd
 

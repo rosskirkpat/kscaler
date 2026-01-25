@@ -6,8 +6,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-//go:generate stub-gen -api CoreV1 -type Secret
-
 // SecretBuilder tracks the options set for a secret.
 type SecretBuilder struct {
 	Name       string

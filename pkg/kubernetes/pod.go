@@ -10,8 +10,6 @@ import (
 	"k8s.io/client-go/tools/remotecommand"
 )
 
-//go:generate stub-gen -api CoreV1 -type Pod
-
 // ContainerLogs returns the (current) logs of a pod's container.
 func (pod *Pod) ContainerLogs(container string) ([]byte, error) {
 	options := corev1.PodLogOptions{
