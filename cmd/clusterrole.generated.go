@@ -11,14 +11,17 @@ import (
 
 	rbacv1 "k8s.io/api/rbac/v1"
 	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/rosskirkpat/kscaler/pkg/kscaler"
 )
 
 var (
 	clusterRoleCmd = &cobra.Command{
-		Use:    "clusterRole [-n 1000] [--kubeconfig /path/to/kube/config]",
-		Short:  "scale clusterRole",
-		Run:    scaleClusterRole,
-		Hidden: true,
+		Use:              "clusterRole [-n 1000] [--kubeconfig /path/to/kube/config]",
+		Short:            "scale clusterRole",
+		Run:              scaleClusterRole,
+		Hidden:           true,
+		TraverseChildren: true,
 	}
 	pclusterRole string
 )
@@ -45,15 +48,15 @@ func scaleClusterRole(cmd *cobra.Command, args []string) {
 	if err := Parser(k); err != nil {
 		cmd.Println("")
 		cmd.Println("[scaleClusterRole] error encountered")
-		logrus.Fatalf(err.Error())
+		logrus.Fatal(err)
 	}
 }
 
-func cleanupClusterRole(ctx context.Context, cli ctrlclient.Client) error {
+func cleanupClusterRoles(ctx context.Context, cli ctrlclient.Client) error {
 	logrus.Infof("attempting to cleanup all kscaler created clusterRoles\n")
 
 	obj := &rbacv1.ClusterRole{}
-	opts := []ctrlclient.DeleteAllOfOption{ctrlclient.InNamespace(DefaultNamespace), ctrlclient.MatchingLabels{"created-by": DefaultName}}
+	opts := []ctrlclient.DeleteAllOfOption{ctrlclient.InNamespace(kscaler.DefaultNamespace), ctrlclient.MatchingLabels{"created-by": kscaler.DefaultName}}
 	err := cli.DeleteAllOf(ctx, obj, opts...)
 	if err != nil {
 		logrus.Errorf("[cleanup] error encountered while cleaning up kscaler created ClusterRoles: %s\n", err)

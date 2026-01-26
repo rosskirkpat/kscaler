@@ -11,14 +11,17 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/rosskirkpat/kscaler/pkg/kscaler"
 )
 
 var (
 	serviceAccountCmd = &cobra.Command{
-		Use:    "serviceAccount [-n 1000] [--kubeconfig /path/to/kube/config]",
-		Short:  "scale serviceAccount",
-		Run:    scaleServiceAccount,
-		Hidden: true,
+		Use:              "serviceAccount [-n 1000] [--kubeconfig /path/to/kube/config]",
+		Short:            "scale serviceAccount",
+		Run:              scaleServiceAccount,
+		Hidden:           true,
+		TraverseChildren: true,
 	}
 	pserviceAccount string
 )
@@ -45,15 +48,15 @@ func scaleServiceAccount(cmd *cobra.Command, args []string) {
 	if err := Parser(k); err != nil {
 		cmd.Println("")
 		cmd.Println("[scaleServiceAccount] error encountered")
-		logrus.Fatalf(err.Error())
+		logrus.Fatal(err)
 	}
 }
 
-func cleanupServiceAccount(ctx context.Context, cli ctrlclient.Client) error {
+func cleanupServiceAccounts(ctx context.Context, cli ctrlclient.Client) error {
 	logrus.Infof("attempting to cleanup all kscaler created serviceAccounts\n")
 
 	obj := &corev1.ServiceAccount{}
-	opts := []ctrlclient.DeleteAllOfOption{ctrlclient.InNamespace(DefaultNamespace), ctrlclient.MatchingLabels{"created-by": DefaultName}}
+	opts := []ctrlclient.DeleteAllOfOption{ctrlclient.InNamespace(kscaler.DefaultNamespace), ctrlclient.MatchingLabels{"created-by": kscaler.DefaultName}}
 	err := cli.DeleteAllOf(ctx, obj, opts...)
 	if err != nil {
 		logrus.Errorf("[cleanup] error encountered while cleaning up kscaler created ServiceAccounts: %s\n", err)

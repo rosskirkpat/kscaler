@@ -11,14 +11,17 @@ import (
 
 	rbacv1 "k8s.io/api/rbac/v1"
 	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/rosskirkpat/kscaler/pkg/kscaler"
 )
 
 var (
 	roleBindingCmd = &cobra.Command{
-		Use:    "roleBinding [-n 1000] [--kubeconfig /path/to/kube/config]",
-		Short:  "scale roleBinding",
-		Run:    scaleRoleBinding,
-		Hidden: true,
+		Use:              "roleBinding [-n 1000] [--kubeconfig /path/to/kube/config]",
+		Short:            "scale roleBinding",
+		Run:              scaleRoleBinding,
+		Hidden:           true,
+		TraverseChildren: true,
 	}
 	proleBinding string
 )
@@ -45,15 +48,15 @@ func scaleRoleBinding(cmd *cobra.Command, args []string) {
 	if err := Parser(k); err != nil {
 		cmd.Println("")
 		cmd.Println("[scaleRoleBinding] error encountered")
-		logrus.Fatalf(err.Error())
+		logrus.Fatal(err)
 	}
 }
 
-func cleanupRoleBinding(ctx context.Context, cli ctrlclient.Client) error {
+func cleanupRoleBindings(ctx context.Context, cli ctrlclient.Client) error {
 	logrus.Infof("attempting to cleanup all kscaler created roleBindings\n")
 
 	obj := &rbacv1.RoleBinding{}
-	opts := []ctrlclient.DeleteAllOfOption{ctrlclient.InNamespace(DefaultNamespace), ctrlclient.MatchingLabels{"created-by": DefaultName}}
+	opts := []ctrlclient.DeleteAllOfOption{ctrlclient.InNamespace(kscaler.DefaultNamespace), ctrlclient.MatchingLabels{"created-by": kscaler.DefaultName}}
 	err := cli.DeleteAllOf(ctx, obj, opts...)
 	if err != nil {
 		logrus.Errorf("[cleanup] error encountered while cleaning up kscaler created RoleBindings: %s\n", err)

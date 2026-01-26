@@ -11,14 +11,17 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/rosskirkpat/kscaler/pkg/kscaler"
 )
 
 var (
 	deploymentCmd = &cobra.Command{
-		Use:    "deployment [-n 1000] [--kubeconfig /path/to/kube/config]",
-		Short:  "scale deployment",
-		Run:    scaleDeployment,
-		Hidden: true,
+		Use:              "deployment [-n 1000] [--kubeconfig /path/to/kube/config]",
+		Short:            "scale deployment",
+		Run:              scaleDeployment,
+		Hidden:           true,
+		TraverseChildren: true,
 	}
 	pdeployment string
 )
@@ -45,15 +48,15 @@ func scaleDeployment(cmd *cobra.Command, args []string) {
 	if err := Parser(k); err != nil {
 		cmd.Println("")
 		cmd.Println("[scaleDeployment] error encountered")
-		logrus.Fatalf(err.Error())
+		logrus.Fatal(err)
 	}
 }
 
-func cleanupDeployment(ctx context.Context, cli ctrlclient.Client) error {
+func cleanupDeployments(ctx context.Context, cli ctrlclient.Client) error {
 	logrus.Infof("attempting to cleanup all kscaler created deployments\n")
 
 	obj := &appsv1.Deployment{}
-	opts := []ctrlclient.DeleteAllOfOption{ctrlclient.InNamespace(DefaultNamespace), ctrlclient.MatchingLabels{"created-by": DefaultName}}
+	opts := []ctrlclient.DeleteAllOfOption{ctrlclient.InNamespace(kscaler.DefaultNamespace), ctrlclient.MatchingLabels{"created-by": kscaler.DefaultName}}
 	err := cli.DeleteAllOf(ctx, obj, opts...)
 	if err != nil {
 		logrus.Errorf("[cleanup] error encountered while cleaning up kscaler created Deployments: %s\n", err)

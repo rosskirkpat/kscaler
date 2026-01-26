@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
+	"go/format"
 	"os"
 	"strings"
 	"text/template"
@@ -25,6 +27,8 @@ import (
 
 	{{ splitBefore .Import }} "{{ splitAfter .Import }}"
 	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/rosskirkpat/kscaler/pkg/kscaler"
 )
 
 var (
@@ -33,8 +37,12 @@ var (
 		Short: "scale {{ .Type }}",
 		Run:   scale{{ toCamel .Type }},
 		Hidden: true,
+		TraverseChildren: true,
 	}
 	p{{ .Type }} string
+	{{ if eq .Type "secret" }}
+	secretSize int
+	{{ end }}
 )
 
 
@@ -60,16 +68,16 @@ func scale{{ toCamel .Type }}(cmd *cobra.Command, args []string) {
 	if err := Parser(k); err != nil {
 		cmd.Println("")
 		cmd.Println("[scale{{ toCamel .Type }}] error encountered")
-		logrus.Fatalf(err.Error())
+		logrus.Fatal(err)
 	}
 }
 
-func cleanup{{ toCamel .Type }}(ctx context.Context, cli ctrlclient.Client) error {
+func cleanup{{ toCamel .Type }}s(ctx context.Context, cli ctrlclient.Client) error {
 	logrus.Infof("attempting to cleanup all kscaler created {{ .Type }}s\n")
 
 	{{ if eq .Type "namespace" }}
 	objList := &corev1.NamespaceList{}
-	err := cli.List(ctx, objList, ctrlclient.MatchingLabels{"created-by": DefaultName})
+	err := cli.List(ctx, objList, ctrlclient.MatchingLabels{"created-by": kscaler.DefaultName})
 	deletedObjCount := 0
 	for _, obj := range objList.Items {
 		err = cli.Delete(ctx, &obj)
@@ -82,7 +90,7 @@ func cleanup{{ toCamel .Type }}(ctx context.Context, cli ctrlclient.Client) erro
 	logrus.Infof("[cleanup] cleaned up %d/%d kscaler {{ toCamel .Type }}s\n", deletedObjCount, len(objList.Items))
 	{{ else }}
 	obj := &{{ splitBefore .Import }}.{{ toCamel .Type }}{}
-	opts := []ctrlclient.DeleteAllOfOption{ctrlclient.InNamespace(DefaultNamespace), ctrlclient.MatchingLabels{"created-by": DefaultName}}
+	opts := []ctrlclient.DeleteAllOfOption{ctrlclient.InNamespace(kscaler.DefaultNamespace), ctrlclient.MatchingLabels{"created-by": kscaler.DefaultName}}
 	err := cli.DeleteAllOf(ctx, obj, opts...)
 	if err != nil {
 		logrus.Errorf("[cleanup] error encountered while cleaning up kscaler created {{ toCamel .Type }}s: %s\n", err)
@@ -137,6 +145,16 @@ func main() {
 
 	outputName := fmt.Sprintf("%s.generated.go", strings.ToLower(parameters.Type))
 
+	var buf bytes.Buffer
+	if err := tmpl.Execute(&buf, parameters); err != nil {
+		panic(err)
+	}
+
+	p, err := format.Source(buf.Bytes())
+	if err != nil {
+		panic(err)
+	}
+
 	output, err := os.Create(outputName)
 	if err != nil {
 		panic(err)
@@ -148,7 +166,7 @@ func main() {
 		}
 	}()
 
-	if err := tmpl.Execute(output, parameters); err != nil {
+	if _, err := output.Write(p); err != nil {
 		panic(err)
 	}
 }

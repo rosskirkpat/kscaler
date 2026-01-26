@@ -11,16 +11,21 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/rosskirkpat/kscaler/pkg/kscaler"
 )
 
 var (
 	secretCmd = &cobra.Command{
-		Use:    "secret [-n 1000] [--kubeconfig /path/to/kube/config]",
-		Short:  "scale secret",
-		Run:    scaleSecret,
-		Hidden: true,
+		Use:              "secret [-n 1000] [--kubeconfig /path/to/kube/config]",
+		Short:            "scale secret",
+		Run:              scaleSecret,
+		Hidden:           true,
+		TraverseChildren: true,
 	}
 	psecret string
+
+	secretSize int
 )
 
 func scaleSecret(cmd *cobra.Command, args []string) {
@@ -45,15 +50,15 @@ func scaleSecret(cmd *cobra.Command, args []string) {
 	if err := Parser(k); err != nil {
 		cmd.Println("")
 		cmd.Println("[scaleSecret] error encountered")
-		logrus.Fatalf(err.Error())
+		logrus.Fatal(err)
 	}
 }
 
-func cleanupSecret(ctx context.Context, cli ctrlclient.Client) error {
+func cleanupSecrets(ctx context.Context, cli ctrlclient.Client) error {
 	logrus.Infof("attempting to cleanup all kscaler created secrets\n")
 
 	obj := &corev1.Secret{}
-	opts := []ctrlclient.DeleteAllOfOption{ctrlclient.InNamespace(DefaultNamespace), ctrlclient.MatchingLabels{"created-by": DefaultName}}
+	opts := []ctrlclient.DeleteAllOfOption{ctrlclient.InNamespace(kscaler.DefaultNamespace), ctrlclient.MatchingLabels{"created-by": kscaler.DefaultName}}
 	err := cli.DeleteAllOf(ctx, obj, opts...)
 	if err != nil {
 		logrus.Errorf("[cleanup] error encountered while cleaning up kscaler created Secrets: %s\n", err)

@@ -11,14 +11,17 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/rosskirkpat/kscaler/pkg/kscaler"
 )
 
 var (
 	persistentVolumeClaimCmd = &cobra.Command{
-		Use:    "persistentVolumeClaim [-n 1000] [--kubeconfig /path/to/kube/config]",
-		Short:  "scale persistentVolumeClaim",
-		Run:    scalePersistentVolumeClaim,
-		Hidden: true,
+		Use:              "persistentVolumeClaim [-n 1000] [--kubeconfig /path/to/kube/config]",
+		Short:            "scale persistentVolumeClaim",
+		Run:              scalePersistentVolumeClaim,
+		Hidden:           true,
+		TraverseChildren: true,
 	}
 	ppersistentVolumeClaim string
 )
@@ -45,15 +48,15 @@ func scalePersistentVolumeClaim(cmd *cobra.Command, args []string) {
 	if err := Parser(k); err != nil {
 		cmd.Println("")
 		cmd.Println("[scalePersistentVolumeClaim] error encountered")
-		logrus.Fatalf(err.Error())
+		logrus.Fatal(err)
 	}
 }
 
-func cleanupPersistentVolumeClaim(ctx context.Context, cli ctrlclient.Client) error {
+func cleanupPersistentVolumeClaims(ctx context.Context, cli ctrlclient.Client) error {
 	logrus.Infof("attempting to cleanup all kscaler created persistentVolumeClaims\n")
 
 	obj := &corev1.PersistentVolumeClaim{}
-	opts := []ctrlclient.DeleteAllOfOption{ctrlclient.InNamespace(DefaultNamespace), ctrlclient.MatchingLabels{"created-by": DefaultName}}
+	opts := []ctrlclient.DeleteAllOfOption{ctrlclient.InNamespace(kscaler.DefaultNamespace), ctrlclient.MatchingLabels{"created-by": kscaler.DefaultName}}
 	err := cli.DeleteAllOf(ctx, obj, opts...)
 	if err != nil {
 		logrus.Errorf("[cleanup] error encountered while cleaning up kscaler created PersistentVolumeClaims: %s\n", err)

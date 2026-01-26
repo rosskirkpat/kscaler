@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/rosskirkpat/kscaler/pkg/kscaler"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"k8s.io/client-go/tools/clientcmd"
@@ -25,18 +26,18 @@ var (
 	}
 
 	CleanupFuncs = []func(ctx context.Context, cli ctrlclient.Client) error{
-		cleanupDeployment,
-		cleanupNamespace,
-		cleanupNode,
-		cleanupClusterRole,
-		cleanupClusterRoleBinding,
-		cleanupPod,
-		cleanupRole,
-		cleanupRoleBinding,
-		cleanupSecret,
-		cleanupService,
-		cleanupServiceAccount,
-		cleanupStatefulSet,
+		cleanupDeployments,
+		cleanupNamespaces,
+		cleanupNodes,
+		cleanupClusterRoles,
+		cleanupClusterRoleBindings,
+		cleanupPods,
+		cleanupRoles,
+		cleanupRoleBindings,
+		cleanupSecrets,
+		cleanupServices,
+		cleanupServiceAccounts,
+		cleanupStatefulSets,
 	}
 )
 
@@ -60,7 +61,7 @@ func cleanup(cmd *cobra.Command, args []string) {
 		cmd.Println("\nAre you sure you want to cleanup? (yes/no)")
 		confirmed := askConfirm(os.Stdin)
 		if !confirmed {
-			logrus.Fatalf("Canceling %v cleanup.", DefaultName)
+			logrus.Fatalf("Canceling %v cleanup.", kscaler.DefaultName)
 		}
 		cmd.Println("Confirmed `yes` from user input")
 	} else {

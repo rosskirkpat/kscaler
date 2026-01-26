@@ -11,14 +11,17 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/rosskirkpat/kscaler/pkg/kscaler"
 )
 
 var (
 	namespaceCmd = &cobra.Command{
-		Use:    "namespace [-n 1000] [--kubeconfig /path/to/kube/config]",
-		Short:  "scale namespace",
-		Run:    scaleNamespace,
-		Hidden: true,
+		Use:              "namespace [-n 1000] [--kubeconfig /path/to/kube/config]",
+		Short:            "scale namespace",
+		Run:              scaleNamespace,
+		Hidden:           true,
+		TraverseChildren: true,
 	}
 	pnamespace string
 )
@@ -45,15 +48,15 @@ func scaleNamespace(cmd *cobra.Command, args []string) {
 	if err := Parser(k); err != nil {
 		cmd.Println("")
 		cmd.Println("[scaleNamespace] error encountered")
-		logrus.Fatalf(err.Error())
+		logrus.Fatal(err)
 	}
 }
 
-func cleanupNamespace(ctx context.Context, cli ctrlclient.Client) error {
+func cleanupNamespaces(ctx context.Context, cli ctrlclient.Client) error {
 	logrus.Infof("attempting to cleanup all kscaler created namespaces\n")
 
 	objList := &corev1.NamespaceList{}
-	err := cli.List(ctx, objList, ctrlclient.MatchingLabels{"created-by": DefaultName})
+	err := cli.List(ctx, objList, ctrlclient.MatchingLabels{"created-by": kscaler.DefaultName})
 	deletedObjCount := 0
 	for _, obj := range objList.Items {
 		err = cli.Delete(ctx, &obj)
